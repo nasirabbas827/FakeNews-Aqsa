@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block title %}Analysis History | FakeNewsAI{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="font-weight-bold"><i class="fas fa-history text-primary mr-2"></i>Analysis History</h2>
+            <p class="text-muted">Review your past article verifications and AI confidence scores.</p>
+        </div>
+        {% if history %}
+ 
+        {% endif %}
+    </div>
+
+    {% if history %}
+        <div class="card border-0 shadow-sm">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="border-0 px-4">Article Preview</th>
+                            <th class="border-0 text-center">Verdict</th>
+                            <th class="border-0 text-center">Confidence</th>
+                            <th class="border-0 text-center">Date & Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for record in history %}
+                        <tr>
+                            <td class="px-4 py-3" style="max-width: 300px;">
+                                <div class="font-weight-bold text-truncate">{{ record.news_text|truncatewords:10 }}</div>
+                                <small class="text-muted">{{ record.news_text|truncatewords:20 }}</small>
+                            </td>
+                            <td class="text-center align-middle">
+                                {% if record.prediction == 1 %}
+                                    <span class="badge badge-soft-danger px-3 py-2">
+                                        <i class="fas fa-times-circle mr-1"></i> Fake
+                                    </span>
+                                {% else %}
+                                    <span class="badge badge-soft-success px-3 py-2">
+                                        <i class="fas fa-check-circle mr-1"></i> Real
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td class="text-center align-middle">
+                                <div class="small font-weight-bold">{{ record.confidence_score|floatformat:1 }}%</div>
+                                <div class="progress mx-auto" style="height: 4px; width: 60px;">
+                                    <div class="progress-bar {% if record.prediction == 1 %}bg-danger{% else %}bg-success{% endif %}" 
+                                         role="progressbar" style="width: {{ record.confidence_score }}%"></div>
+                                </div>
+                            </td>
+                            <td class="text-center align-middle text-muted small">
+                                {{ record.analyzed_at|date:"M d, Y" }}<br>
+                                {{ record.analyzed_at|date:"H:i" }}
+                            </td>
+                            
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% else %}
+        <div class="card border-0 shadow-sm py-5 text-center">
+            <div class="card-body">
+                <div class="mb-4">
+                    <i class="fas fa-folder-open fa-4x text-light"></i>
+                </div>
+                <h4>No analysis history found</h4>
+                <p class="text-muted">You haven't analyzed any articles yet. Head back to the dashboard to start.</p>
+                <a href="{% url 'dashboard' %}" class="btn btn-primary mt-2">Go to Dashboard</a>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<style>
+    /* Soft colored badges for a modern look */
+    .badge-soft-danger {
+        background-color: #fee2e2;
+        color: #dc2626;
+        border-radius: 20px;
+    }
+    .badge-soft-success {
+        background-color: #dcfce7;
+        color: #16a34a;
+        border-radius: 20px;
+    }
+    .table thead th {
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05rem;
+        color: #64748b;
+    }
+    .table tbody tr {
+        transition: background 0.2s ease;
+    }
+    .table tbody tr:hover {
+        background-color: #f1f5f9;
+    }
+    .progress {
+        background-color: #e2e8f0;
+    }
+</style>
+{% endblock %}

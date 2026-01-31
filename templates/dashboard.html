@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block title %}AI Analysis Dashboard | Fake News Detection{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+
+    <div class="row align-items-center mb-4">
+        <div class="col-md-8">
+            <h2 class="font-weight-bold text-dark">NLP Analysis Dashboard</h2>
+            <p class="text-muted">Utilizing Logistic Regression and SVM to verify information authenticity.</p>
+        </div>
+        <div class="col-md-4 text-right">
+            <span class="badge badge-success p-2">System Online</span>
+            <span class="badge badge-info p-2">Model v1.0.2</span>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-7">
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-white border-bottom-0 pt-4">
+                    <h5 class="card-title font-weight-bold mb-0">Article Verification</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label class="text-muted small font-weight-bold">PASTE NEWS CONTENT OR HEADLINE</label>
+                            {{ form.article_text }} {% if not form.article_text %}
+                                {{ form.as_p }}
+                            {% endif %}
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block py-2">
+                            <i class="fas fa-search-plus mr-2"></i>Analyze Authenticity
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+ 
+        </div>
+
+        <div class="col-lg-5">
+            {% if prediction_result %}
+            <div class="card shadow-sm border-0 bg-light mb-4">
+                <div class="card-body text-center">
+                    <h6 class="text-uppercase text-muted small font-weight-bold mb-3">Analysis Verdict</h6>
+                    
+                    {% if prediction_result.lr == "Fake" %}
+                        <div class="display-4 font-weight-bold text-danger mb-2">FAKE</div>
+                    {% else %}
+                        <div class="display-4 font-weight-bold text-success mb-2">REAL</div>
+                    {% endif %}
+
+                    <div class="px-4">
+                        <div class="d-flex justify-content-between mb-1 small font-weight-bold">
+                            <span>Confidence Score</span>
+                            <span>{{ prediction_result.avg_confidence }}%</span>
+                        </div>
+                        <div class="progress mb-4" style="height: 10px;">
+                            <div class="progress-bar {% if prediction_result.lr == 'Fake' %}bg-danger{% else %}bg-success{% endif %}" 
+                                 role="progressbar" 
+                                 style="width: {{ prediction_result.avg_confidence }}%"></div>
+                        </div>
+                    </div>
+
+                    <div class="row border-top mt-3 pt-3">
+                        <div class="col-6 border-right">
+                            <small class="text-muted d-block">LR Model</small>
+                            <span class="badge {% if prediction_result.lr == 'Fake' %}badge-soft-danger{% else %}badge-soft-success{% endif %}">{{ prediction_result.lr }}</span>
+                        </div>
+                        <div class="col-6">
+                            <small class="text-muted d-block">SVM Model</small>
+                            <span class="badge {% if prediction_result.svm == 'Fake' %}badge-soft-danger{% else %}badge-soft-success{% endif %}">{{ prediction_result.svm }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="card shadow-sm border-0 h-100 min-vh-25">
+                <div class="card-body d-flex flex-column justify-content-center align-items-center text-muted">
+                    <i class="fas fa-chart-bar fa-3x mb-3 opacity-20"></i>
+                    <p>Input text to generate classification metrics</p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+    .badge-soft-danger { background-color: #f8d7da; color: #721c24; }
+    .badge-soft-success { background-color: #d4edda; color: #155724; }
+    .opacity-20 { opacity: 0.2; }
+</style>
+{% endblock %}
