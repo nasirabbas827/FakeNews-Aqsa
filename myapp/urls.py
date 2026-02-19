@@ -11,6 +11,8 @@ urlpatterns = [
     path('dashboard/', views.dashboard_view, name='dashboard'),
     path('edit-profile/', views.edit_profile, name='edit_profile'),
     path('news-history/', views.news_history_view, name='news_history'),    
+    path('news-history/export-csv/', views.export_news_history_csv, name='export_news_csv'),
+     path('datasets/', views.dataset_list_view, name='dataset_list'),
 ]
 
 if settings.DEBUG:

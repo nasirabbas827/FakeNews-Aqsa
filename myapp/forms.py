@@ -5,21 +5,37 @@ from .models import CustomerUser
 
 class RegisterForm(forms.ModelForm):
     password = forms.CharField(
-        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Create password'}),
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Create password'
+        }),
         label="Password"
     )
+
     confirm_password = forms.CharField(
-        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Confirm password'}),
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Confirm password'
+        }),
         label="Confirm Password"
     )
 
     class Meta:
         model = CustomerUser
-        fields = ['username', 'email', 'full_name']   # removed password & confirm_password from fields
+        fields = ['username', 'email', 'full_name']
         widgets = {
-            'username': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Username'}),
-            'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Email address'}),
-            'full_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Full name'}),
+            'username': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Username'
+            }),
+            'email': forms.EmailInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Email address'
+            }),
+            'full_name': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Full name'
+            }),
         }
 
     def clean(self):
@@ -34,7 +50,7 @@ class RegisterForm(forms.ModelForm):
 
     def save(self, commit=True):
         user = super().save(commit=False)
-        user.set_password(self.cleaned_data["password"])  # better than make_password (handles password hashing properly)
+        user.password = make_password(self.cleaned_data["password"])
         if commit:
             user.save()
         return user

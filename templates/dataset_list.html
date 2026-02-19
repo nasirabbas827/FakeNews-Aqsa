@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Available Datasets | FakeNewsAI{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <h2 class="mb-4"><i class="fas fa-database text-primary mr-2"></i>Available Datasets</h2>
+    
+    {% if datasets %}
+    <div class="card shadow-sm">
+        <div class="card-body table-responsive">
+            <table class="table table-striped table-bordered align-middle mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th>#</th>
+                        <th>Dataset Name</th>
+                        <th>Uploaded At</th>
+                        <th class="text-center">Download</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for dataset in datasets %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ dataset.name }}</td>
+                        <td>{{ dataset.uploaded_at|date:"M d, Y H:i" }}</td>
+                        <td class="text-center">
+                            <a href="{{ dataset.file.url }}" class="btn btn-sm btn-primary" download>
+                                <i class="fas fa-download mr-1"></i> Download
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% else %}
+    <div class="card border-0 shadow-sm py-5 text-center">
+        <div class="card-body">
+            <div class="mb-4">
+                <i class="fas fa-folder-open fa-4x text-light"></i>
+            </div>
+            <h4>No datasets available</h4>
+            <p class="text-muted">Admin has not uploaded any sample datasets yet.</p>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+    .table thead th {
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05rem;
+        color: #fff;
+    }
+    .table tbody tr:hover {
+        background-color: #f1f5f9;
+    }
+</style>
+{% endblock %}

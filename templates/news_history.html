@@ -9,14 +9,28 @@
             <p class="text-muted">Review your past article verifications and AI confidence scores.</p>
         </div>
         {% if history %}
- 
+        <div>
+            <a href="{% url 'export_news_csv' %}" class="btn btn-outline-primary">Export CSV</a>
+            <button id="exportPdfBtn" class="btn btn-outline-secondary ml-2">Export PDF</button>
+        </div>
         {% endif %}
     </div>
 
     {% if history %}
+        <!-- Charts Row -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div id="verdictChart"></div>
+            </div>
+            <div class="col-md-6">
+                <div id="confidenceChart"></div>
+            </div>
+        </div>
+
+        <!-- Table of Analysis History -->
         <div class="card border-0 shadow-sm">
             <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
+                <table id="historyTable" class="table table-hover align-middle mb-0">
                     <thead class="bg-light">
                         <tr>
                             <th class="border-0 px-4">Article Preview</th>
@@ -54,7 +68,6 @@
                                 {{ record.analyzed_at|date:"M d, Y" }}<br>
                                 {{ record.analyzed_at|date:"H:i" }}
                             </td>
-                            
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -75,32 +88,58 @@
     {% endif %}
 </div>
 
+<!-- Styles -->
 <style>
-    /* Soft colored badges for a modern look */
-    .badge-soft-danger {
-        background-color: #fee2e2;
-        color: #dc2626;
-        border-radius: 20px;
-    }
-    .badge-soft-success {
-        background-color: #dcfce7;
-        color: #16a34a;
-        border-radius: 20px;
-    }
-    .table thead th {
-        font-size: 0.8rem;
-        text-transform: uppercase;
-        letter-spacing: 0.05rem;
-        color: #64748b;
-    }
-    .table tbody tr {
-        transition: background 0.2s ease;
-    }
-    .table tbody tr:hover {
-        background-color: #f1f5f9;
-    }
-    .progress {
-        background-color: #e2e8f0;
-    }
+    .badge-soft-danger { background-color: #fee2e2; color: #dc2626; border-radius: 20px; }
+    .badge-soft-success { background-color: #dcfce7; color: #16a34a; border-radius: 20px; }
+    .table thead th { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05rem; color: #64748b; }
+    .table tbody tr { transition: background 0.2s ease; }
+    .table tbody tr:hover { background-color: #f1f5f9; }
+    .progress { background-color: #e2e8f0; }
 </style>
+
+<!-- Scripts -->
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<script>
+    // ====== Plotly Charts ======
+    const verdictData = {
+        x: ['Real', 'Fake'],
+        y: [{{ real_count }}, {{ fake_count }}],
+        type: 'bar',
+        marker: { color: ['#16a34a', '#dc2626'] }
+    };
+    Plotly.newPlot('verdictChart', [verdictData], { title: 'Verdict Count', margin:{ t:40 } });
+
+    const confidenceData = {
+        x: {{ date_labels|safe }},
+        y: {{ confidence_list|safe }},
+        type: 'scatter',
+        mode: 'lines+markers',
+        line: {color:'#3b82f6'},
+        marker: {size:6}
+    };
+    Plotly.newPlot('confidenceChart', [confidenceData], { title: 'Confidence Over Time', margin:{ t:40 } });
+
+
+
+    // ====== Export Table to PDF ======
+    document.getElementById('exportPdfBtn')?.addEventListener('click', () => {
+        const table = document.getElementById('historyTable');
+        html2canvas(table).then(canvas => {
+            const imgData = canvas.toDataURL('image/png');
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF('p', 'pt', 'a4');
+            const pageWidth = pdf.internal.pageSize.getWidth();
+            const pageHeight = pdf.internal.pageSize.getHeight();
+            const imgProps = pdf.getImageProperties(imgData);
+            const pdfWidth = pageWidth - 40; // 20pt margin
+            const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+            pdf.addImage(imgData, 'PNG', 20, 20, pdfWidth, pdfHeight);
+            pdf.save('analysis_history.pdf');
+        });
+    });
+</script>
 {% endblock %}
